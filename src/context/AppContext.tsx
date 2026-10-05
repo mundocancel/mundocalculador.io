@@ -18,6 +18,8 @@ import {
 } from 'firebase/firestore';
 
 interface AppContextType {
+// ... tus otras propiedades ...
+  generarDespiecePDF: (cliente: string, vanoAncho: number, vanoAlto: number) => void;
   products: Product[];
   prices: Record<string, PriceData>;
   cart: CartItem[];
