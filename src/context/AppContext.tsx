@@ -1,3 +1,5 @@
+import { calcularDespiece2500Interior, ResultadoDespiece } from '../utils/calculosEuroalum';
+import { generarDocumentoPDF, DatosDocumento } from '../services/pdfGenerator';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, PriceData, CartItem, Project, AppNote, INITIAL_PRODUCTS, INITIAL_PRICES, CalculationHistory } from '../data/initialData';
 import { calcularDespiece, CalculationResult } from '../lib/calculationLogic';
