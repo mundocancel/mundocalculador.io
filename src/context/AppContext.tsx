@@ -17,9 +17,7 @@ import {
   limit 
 } from 'firebase/firestore';
 
-interface AppContextType {
-// ... tus otras propiedades ...
-  generarDespiecePDF: (cliente: string, vanoAncho: number, vanoAlto: number) => void;
+interface AppContextType {;
   products: Product[];
   prices: Record<string, PriceData>;
   cart: CartItem[];
@@ -47,7 +45,10 @@ interface AppContextType {
   saveToHistory: (serie: string, config: string, w: number, h: number) => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType |
+// ... tus otras propiedades ...
+  generarDespiecePDF: (cliente: string, vanoAncho: number, vanoAlto: number) => void;
+undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [prices, setPrices] = useState<Record<string, PriceData>>(INITIAL_PRICES);
@@ -115,7 +116,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     if (!auth) {
       setAuthLoading(false);
-      return;
+      const generarDespiecePDF = (cliente: string, vanoAncho: number, vanoAlto: number) => {
+    try {
+      // 1. Calculamos usando la lógica oficial de Indalum
+      const resultadoDespiece = calcularDespiece2500Interior({ 
+        ancho: vanoAncho, 
+        alto: vanoAlto 
+      });
+
+      // 2. Preparamos los datos para el PDF
+      const datosDocumento: DatosDocumento = {
+        tipoDocumento: "Despiece",
+        cliente: cliente || "Cliente General",
+        fecha: new Date().toLocaleDateString("es-MX", { 
+          year: 'numeric', month: 'long', day: 'numeric' 
+        }),
+        vanoAncho,
+        vanoAlto,
+        despiece: resultadoDespiece
+      };
+
+      // 3. Generamos y descargamos el PDF
+      generarDocumentoPDF(datosDocumento);
+      setError(null); // Limpiar errores si los hubo
+    } catch (error) {
+      console.error("Error al generar PDF:", error);
+      setError("No se pudo generar el documento PDF. Verifica las medidas.");
+    }
+  };
+return;
     }
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
@@ -471,3 +500,11 @@ export const useApp = () => {
   }
   return context;
 };
+return (
+    <AppContext.Provider value={{
+      // ... todas tus otras propiedades ...
+      generarDespiecePDF, // <-- AGREGA ESTA LÍNEA
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
