@@ -1,15 +1,17 @@
 # Stage de construcción
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+
+# Build con output visible
+RUN npm run build 2>&1 || (echo "=== BUILD FALLÓ ===" && exit 1)
 
 # Stage de producción con Nginx
 FROM nginx:stable-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-# Configuración básica de Nginx para SPAs (opcional pero recomendada)
+
 RUN echo 'server { \
     listen 80; \
     location / { \
