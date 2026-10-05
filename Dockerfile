@@ -1,25 +1,28 @@
-# Stage de construcción
-FROM node:20-alpine as build
+# ==========================================
+# ETAPA 1: CONSTRUCCIÓN (Builder)
+# ==========================================
+FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+
+# Copiar solo los archivos de dependencias primero (mejora el cache de Docker)
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# Copiar el resto del código y construir
 COPY . .
+RUN npm run build
 
-# Build con output visible
-RUN npm run build 2>&1 || (echo "=== BUILD FALLÓ ===" && exit 1)
+# ==========================================
+# ETAPA 2: PRODUCCIÓN (Servidor ligero)
+# ==========================================
+FROM nginx:alpine AS production
 
-# Stage de producción con Nginx
-FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copiar los archivos compilados de la etapa anterior
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Copiar una configuración personalizada de Nginx para React (SPA)
+# Esto evita errores de "404 Not Found" al recargar la página en rutas internas
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
