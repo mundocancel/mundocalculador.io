@@ -1,5 +1,3 @@
-import { calcularDespiece2500Interior, ResultadoDespiece } from '../utils/calculosEuroalum';
-import { generarDocumentoPDF, DatosDocumento } from '../services/pdfGenerator';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, PriceData, CartItem, Project, AppNote, INITIAL_PRODUCTS, INITIAL_PRICES, CalculationHistory } from '../data/initialData';
 import { calcularDespiece, CalculationResult } from '../lib/calculationLogic';
@@ -17,6 +15,11 @@ import {
   limit 
 } from 'firebase/firestore';
 
+// ✅ Imports para el PDF (Asegúrate de que estas rutas coincidan con donde creaste los archivos)
+import { calcularDespiece2500Interior, ResultadoDespiece } from '../utils/calculosEuroalum';
+import { generarDocumentoPDF, DatosDocumento } from '../services/pdfGenerator';
+
+// ✅ 1. La interfaz debe estar completa y cerrada con }
 interface AppContextType {
   products: Product[];
   prices: Record<string, PriceData>;
@@ -43,6 +46,9 @@ interface AppContextType {
   deleteNote: (id: number | string) => void;
   performDespiece: (serie: string, config: string, w: number, h: number) => CalculationResult;
   saveToHistory: (serie: string, config: string, w: number, h: number) => void;
+  
+  // ✅ 2. La nueva función va DENTRO de la interfaz, antes de la llave de cierre
+  generarDespiecePDF: (cliente: string, vanoAncho: number, vanoAlto: number) => void;
 }
 
 const AppContext = createContext<AppContextType |
