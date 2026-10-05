@@ -17,7 +17,7 @@ import {
   limit 
 } from 'firebase/firestore';
 
-interface AppContextType {;
+interface AppContextType {
   products: Product[];
   prices: Record<string, PriceData>;
   cart: CartItem[];
