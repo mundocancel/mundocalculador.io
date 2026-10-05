@@ -1,23 +1,34 @@
 // src/data/mergeCatalogos.ts
-import { INITIAL_PRODUCTS, INITIAL_PRICES, type Product, type PriceData } from "./initialData";
+import {
+  INITIAL_PRODUCTS,
+  INITIAL_PRICES,
+  type Product,
+  type PriceData,
+} from "./initialData";
 import { CATALOGO_INDALUM_EXTRA } from "./catalogoIndalum";
 
 /**
- * Merge del catálogo base con los perfiles extraídos del PDF Indalum.
- * Evita duplicados por `codigo`.
+ * Catálogo completo: base + perfiles extraídos del PDF Indalum.
+ * Filtra duplicados por `codigo`.
  */
 export const CATALOGO_COMPLETO: Product[] = [
   ...INITIAL_PRODUCTS,
   ...CATALOGO_INDALUM_EXTRA.filter(
-    (nuevo) => !INITIAL_PRODUCTS.some((existente) => existente.codigo === nuevo.codigo)
+    (nuevo) =>
+      !INITIAL_PRODUCTS.some((existente) => existente.codigo === nuevo.codigo)
   ),
 ];
 
 /**
- * Precios de referencia para los códigos nuevos.
- * TODO: reemplazar con la lista oficial de Indalum.
+ * Precios completos: base + valores de referencia.
+ * Filtra duplicados por `codigo`.
  */
-export const PRECIOS_EXTRA: Record<string, PriceData> = {
+export const PRECIOS_COMPLETOS: Record<string, PriceData> = {
+  ...INITIAL_PRICES,
+  ...PRECIOS_EXTRA,
+};
+
+const PRECIOS_EXTRA: Record<string, PriceData> = {
   // Serie 2500
   "1680": { unitPrice: 350.00, type: "meter" },
   "1681": { unitPrice: 420.00, type: "meter" },
@@ -136,25 +147,3 @@ export const PRECIOS_EXTRA: Record<string, PriceData> = {
   "4059": { unitPrice: 420.00, type: "meter" },
   "4054": { unitPrice: 1750.00, type: "meter" },
 };
-
-/**
- * Precios completos: base + extra.
- */
-export const PRECIOS_COMPLETOS: Record<string, PriceData> = {
-  ...INITIAL_PRICES,
-  ...PRECIOS_EXTRA,
-};
-
-/**
- * Helper para obtener producto + precio unificados.
- */
-export function getProductoConPrecio(codigo: string) {
-  const producto = CATALOGO_COMPLETO.find((p) => p.codigo === codigo);
-  const precio = PRECIOS_COMPLETOS[codigo];
-  if (!producto) return null;
-  return {
-    ...producto,
-    unitPrice: precio?.unitPrice ?? null,
-    unitType: precio?.type ?? null,
-  };
-}
